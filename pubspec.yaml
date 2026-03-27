@@ -1,0 +1,26 @@
+name: iAprendiz
+description: App IA Amigo
+
+publish_to: 'none'
+
+version: 1.0.1+2
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  http: ^1.2.0
+  speech_to_text: ^7.3.0
+  flutter_tts: ^4.2.5
+  shared_preferences: ^2.2.2
+  google_mobile_ads: ^5.0.0
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
