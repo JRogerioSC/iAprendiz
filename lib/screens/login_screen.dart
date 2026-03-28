@@ -15,10 +15,21 @@ class _LoginScreenState extends State<LoginScreen> {
   String usuario = "";
   String senha = "";
 
+  bool mostrarSenha = false;
+  bool carregando = false;
+
   void entrar() async {
     if (usuario.isEmpty || senha.isEmpty) return;
 
+    setState(() {
+      carregando = true;
+    });
+
     final id = await ApiService.login(usuario, senha);
+
+    setState(() {
+      carregando = false;
+    });
 
     if (id != null) {
       final prefs = await SharedPreferences.getInstance();
@@ -34,51 +45,103 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("🔐 Login", style: TextStyle(color: Colors.white)),
-
-            TextField(
-              style: const TextStyle(color: Colors.white), // ✅ TEXTO DIGITADO
-              cursorColor: Colors.white, // cursor branco
-              onChanged: (v) => usuario = v,
-              decoration: const InputDecoration(
-                hintText: "Usuário",
-                hintStyle: TextStyle(color: Colors.white54), // hint visível
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white38),
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "Ao colocar o nome de usuário e senha, você estará realizando seu cadastro, ou entrando na sua conta caso já tenha uma.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
+
+                const SizedBox(height: 15),
+
+                const Text("🔐 Login",
+                    style: TextStyle(color: Colors.white)),
+
+                TextField(
+                  style: const TextStyle(color: Colors.white),
+                  cursorColor: Colors.white,
+                  onChanged: (v) => usuario = v,
+                  decoration: const InputDecoration(
+                    hintText: "Usuário",
+                    hintStyle: TextStyle(color: Colors.white54),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white38),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+
+                TextField(
+                  obscureText: !mostrarSenha,
+                  style: const TextStyle(color: Colors.white),
+                  cursorColor: Colors.white,
+                  onChanged: (v) => senha = v,
+                  decoration: InputDecoration(
+                    hintText: "Senha",
+                    hintStyle: const TextStyle(color: Colors.white54),
+                    enabledBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white38),
+                    ),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        mostrarSenha
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          mostrarSenha = !mostrarSenha;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+
+                ElevatedButton(
+                  onPressed: carregando ? null : entrar,
+                  child: const Text("Entrar"),
+                )
+              ],
+            ),
+          ),
+
+          if (carregando)
+            Container(
+              color: Colors.black.withOpacity(0.8),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      "CARREGANDO...",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-
-            TextField(
-              obscureText: true,
-              style: const TextStyle(color: Colors.white), // ✅ TEXTO DIGITADO
-              cursorColor: Colors.white,
-              onChanged: (v) => senha = v,
-              decoration: const InputDecoration(
-                hintText: "Senha",
-                hintStyle: TextStyle(color: Colors.white54),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white38),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
-              ),
-            ),
-
-            ElevatedButton(
-              onPressed: entrar,
-              child: const Text("Entrar"),
-            )
-          ],
-        ),
+        ],
       ),
     );
   }
