@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
@@ -39,6 +40,19 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Login inválido")));
     }
+  }
+
+  // 🔥 NOVO: Entrar como visitante (SEM alterar sua lógica existente)
+  void entrarComoVisitante() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // gera um id único de visitante
+    final random = Random();
+    final guestId = "guest_${DateTime.now().millisecondsSinceEpoch}_${random.nextInt(9999)}";
+
+    await prefs.setString("usuarioId", guestId);
+
+    widget.onLogin(guestId);
   }
 
   @override
@@ -115,10 +129,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
+                const SizedBox(height: 10),
+
                 ElevatedButton(
                   onPressed: carregando ? null : entrar,
                   child: const Text("Entrar"),
-                )
+                ),
+
+                const SizedBox(height: 10),
+
+                // 🔥 NOVO BOTÃO (visitante)
+                TextButton(
+                  onPressed: entrarComoVisitante,
+                  child: const Text(
+                    "Entrar como visitante",
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
               ],
             ),
           ),
