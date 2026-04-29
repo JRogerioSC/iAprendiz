@@ -26,9 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String usuarioId = "";
   String nomeIA = "";
 
-  // 🔥 ADMOB
-  BannerAd? banner;
-  bool bannerCarregado = false;
+  // 🔥 INTERSTITIAL
+  InterstitialAd? interstitialAd;
 
   @override
   void initState() {
@@ -37,24 +36,36 @@ class _HomeScreenState extends State<HomeScreen> {
     carregarAd();
   }
 
+  // 🔥 CARREGAR ANÚNCIO
   void carregarAd() {
-    banner = BannerAd(
-      adUnitId: "ca-app-pub-4787541780243563/2090379852",
-      size: AdSize.banner,
+    InterstitialAd.load(
+      adUnitId: "ca-app-pub-4787541780243563/6723521753", // 🔥 TESTE OFICIAL
       request: const AdRequest(),
-      listener: BannerAdListener(
+      adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
-          print("✅ ANÚNCIO CARREGADO");
-          setState(() {
-            bannerCarregado = true;
-          });
+          interstitialAd = ad;
+
+          // 🔥 MOSTRAR ASSIM QUE CARREGAR
+          interstitialAd!.show();
+
+          // 🔥 DESCARTA DEPOIS DE USAR
+          interstitialAd!.fullScreenContentCallback =
+              FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+              interstitialAd = null;
+            },
+            onAdFailedToShowFullScreenContent: (ad, error) {
+              ad.dispose();
+              interstitialAd = null;
+            },
+          );
         },
-        onAdFailedToLoad: (ad, error) {
-          print("❌ ERRO ANÚNCIO: $error");
-          ad.dispose();
+        onAdFailedToLoad: (error) {
+          print("❌ ERRO INTERSTITIAL: $error");
         },
       ),
-    )..load();
+    );
   }
 
   void init() async {
@@ -141,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    banner?.dispose();
+    interstitialAd?.dispose();
     super.dispose();
   }
 
@@ -150,22 +161,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF083b08),
 
-      // 🔥 SAFEAREA NO ANÚNCIO
-      bottomNavigationBar: banner != null && bannerCarregado
-          ? SafeArea(
-              child: Container(
-                alignment: Alignment.center,
-                width: banner!.size.width.toDouble(),
-                height: banner!.size.height.toDouble(),
-                child: AdWidget(ad: banner!),
-              ),
-            )
-          : null,
+      // ❌ REMOVIDO BANNER COMPLETAMENTE
 
       body: SafeArea(
         child: Column(
           children: [
-            // 🔥 AVISO NO TOPO (ADICIONADO)
+            // 🔥 AVISO NO TOPO
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
